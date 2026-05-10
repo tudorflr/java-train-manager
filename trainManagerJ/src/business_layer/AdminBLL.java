@@ -148,11 +148,20 @@ public class AdminBLL {
             return true;
         }
 
+        int sentEmails = 0;
+
         for(Booking booking : bookings) {
-            emailService.sendDelayNotification(booking.getCustomer().getEmail(), train);
+            if(emailService.sendDelayNotification(booking.getCustomer().getEmail(), train)) {
+                sentEmails++;
+            }
         }
 
-        System.out.println("Delay saved and the booked customers were emailed");
+        if(sentEmails == bookings.size()) {
+            System.out.println("Delay saved and the booked customers were emailed");
+        } else {
+            System.out.println("Delay saved, but only " + sentEmails + " of " + bookings.size() + " emails were sent");
+        }
+
         return true;
     }
 }

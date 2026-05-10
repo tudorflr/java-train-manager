@@ -55,9 +55,14 @@ public class BookingBLL {
         Booking booking = new Booking(nextBookingId++, customer, train, from, to, ticketCount);
 
         bookingDAO.addBooking(booking);
-        emailService.sendBookingConfirmation(email, booking);
+        boolean emailSent = emailService.sendBookingConfirmation(email, booking);
 
-        System.out.println("Booked, you're all set");
+        if(emailSent) {
+            System.out.println("Booked, you're all set");
+        } else {
+            System.out.println("Booked, but the confirmation email did not go out");
+        }
+
         return true;
     }
 

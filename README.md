@@ -4,7 +4,7 @@ This project is a small console application for train ticket booking. The idea w
 
 The application has some predefined trains and routes. A normal user can search trips and book tickets. An admin can manage trains and routes, see bookings, and set train delays.
 
-Emails are simulated in the console. I did this because the important part here is the application logic, not connecting to a real SMTP server.
+Emails are sent through SMTP. The SMTP details are not written directly in the code, because passwords should not be committed in a project. They are read from environment variables instead.
 
 ## How to run
 
@@ -14,6 +14,37 @@ From the project folder:
 javac -d out $(find trainManagerJ/src -name "*.java")
 java -cp out Main
 ```
+
+## Email setup
+
+Before running the app, set these environment variables in the terminal:
+
+```bash
+export SMTP_HOST="smtp.gmail.com"
+export SMTP_PORT="587"
+export SMTP_USER="your_email@gmail.com"
+export SMTP_PASSWORD="your_app_password"
+export SMTP_FROM="your_email@gmail.com"
+```
+
+Then run:
+
+```bash
+java -cp out Main
+```
+
+For most email providers, port `587` with STARTTLS is the normal option. That is what the app uses by default.
+
+For Gmail, the password should be an app password, not usually your normal account password. For other providers, use their SMTP host, username, and password.
+
+If an email provider uses SSL on port `465`, also set:
+
+```bash
+export SMTP_SSL="true"
+export SMTP_STARTTLS="false"
+```
+
+If the SMTP variables are missing or wrong, the booking is still saved, but the app prints that the email was not sent.
 
 ## Project structure
 
@@ -46,7 +77,7 @@ I used this structure so the responsibilities are not all mixed in one file.
 - checking seat availability
 - searching routes
 - admin operations
-- email simulation
+- real email sending through SMTP
 
 `presentation` contains the console menu and reads input from the user.
 
@@ -168,14 +199,16 @@ Brasov
 2
 
 Output:
------- email simulation ------
-To: ana@example.com
-Subject: your train booking
-Hi, your booking is in
-Booking 1 | Ana Pop <ana@example.com> | train IR-100 | Cluj to Brasov | tickets 2
----------------------------
-
+Email sent to ana@example.com
 Booked, you're all set
+```
+
+If SMTP is not configured, the booking is still stored, but the output is:
+
+```text
+Email not sent, SMTP settings are missing
+Set SMTP_HOST, SMTP_USER, SMTP_PASSWORD and optionally SMTP_PORT / SMTP_FROM
+Booked, but the confirmation email did not go out
 ```
 
 Overbooking example:
@@ -343,14 +376,11 @@ Input:
 25
 
 Output:
------- email simulation ------
-To: ana@example.com
-Subject: train delay update
-Heads up, train IR-100 is running 25 min late
----------------------------
-
+Email sent to ana@example.com
 Delay saved and the booked customers were emailed
 ```
+
+If one or more emails fail, the app prints how many were actually sent.
 
 If there are no customers booked on that train:
 
